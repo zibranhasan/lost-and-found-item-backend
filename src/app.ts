@@ -7,6 +7,7 @@ import { FoundItemCategoryRoutes } from "./app/modules/Found-item-categories/Fou
 import { FoundItemsRoutes } from "./app/modules/Found-Item/found-Item.routes";
 import { ClaimRoutes } from "./app/modules/Claim/claim.route";
 import { userRoutes } from "./app/modules/User/user.routes";
+import { LostItemsRoutes } from "./app/modules/Lost-Item/Lost-Item.route";
 
 const app: Application = express();
 app.use(cors());
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", AuthRoutes);
 app.use("/api", FoundItemCategoryRoutes);
 app.use("/api", FoundItemsRoutes);
+app.use("/api", LostItemsRoutes);
 app.use("/api", ClaimRoutes);
 app.use("/api", userRoutes);
 

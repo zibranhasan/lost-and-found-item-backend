@@ -41,7 +41,7 @@ const createClaim = (data) => __awaiter(void 0, void 0, void 0, function* () {
         // Create the claim
         const createdClaim = yield prisma_1.default.claim.create({
             data: {
-                userId,
+                userId, // Include userId here
                 foundItemId,
                 distinguishingFeatures,
                 lostDate,
@@ -74,7 +74,7 @@ const getClaims = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return {
                 id,
                 userId,
-                foundItemId: claimFoundItemId,
+                foundItemId: claimFoundItemId, // Use the renamed variable here
                 distinguishingFeatures,
                 lostDate,
                 status,
@@ -126,8 +126,42 @@ const updateClaimStatus = (claimId, status) => __awaiter(void 0, void 0, void 0,
         throw new ApiError_1.default(http_status_codes_1.default.BAD_REQUEST, "There are issues updaeting claim");
     }
 });
+const getMyClaims = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Find the user by email
+        const user = yield prisma_1.default.user.findUnique({
+            where: {
+                email,
+            },
+        });
+        if (!user) {
+            throw new Error("User not found");
+        }
+        const userId = user.id;
+        // Retrieve claims associated with the user ID
+        const claims = yield prisma_1.default.claim.findMany({
+            where: {
+                userId,
+            },
+            include: {
+                foundItem: {
+                    include: {
+                        user: true,
+                        category: true,
+                    },
+                },
+            },
+        });
+        return claims;
+    }
+    catch (error) {
+        console.error("Error retrieving claims:", error);
+        throw error;
+    }
+});
 exports.ClaimServices = {
     createClaim,
     getClaims,
     updateClaimStatus,
+    getMyClaims,
 };

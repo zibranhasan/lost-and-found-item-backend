@@ -29,7 +29,37 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await AuthServices.changePassword(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 202,
+    success: true,
+    message: "Password changed successfully",
+    data: result,
+  });
+});
+
+const updateUserStatus = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { status } = req.body;
+
+  try {
+    const updatedUser = await AuthServices.updateUserStatus(userId, status);
+
+    sendResponse(res, {
+      statusCode: 202,
+      success: true,
+      message: "User status updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {}
+};
+
 export const AuthController = {
   loginUser,
   register,
+  changePassword,
+  updateUserStatus,
 };

@@ -47,7 +47,6 @@ const register = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, email, password, profile } = data;
         const hashedPassword = yield bcrypt.hash(password, 12);
-        console.log(hashedPassword);
         const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
             const createdUserData = yield transactionClient.user.create({
                 data: {
@@ -62,8 +61,8 @@ const register = (data) => __awaiter(void 0, void 0, void 0, function* () {
             // Create user profile
             const createdProfileData = yield transactionClient.userProfile.create({
                 data: {
-                    id: (0, uuid_1.v4)(),
-                    userId: createdUserData.id,
+                    id: (0, uuid_1.v4)(), // Generate a unique ID for the profile
+                    userId: createdUserData.id, // Associate the profile with the created user
                     bio: profile.bio,
                     age: profile.age,
                     createdAt: new Date(),
@@ -74,6 +73,7 @@ const register = (data) => __awaiter(void 0, void 0, void 0, function* () {
                 id: createdUserData.id,
                 name: createdUserData.name,
                 email: createdUserData.email,
+                status: createdUserData.status,
                 createdAt: createdUserData.createdAt.toISOString(),
                 updatedAt: createdUserData.updatedAt.toISOString(),
                 profile: {
@@ -99,21 +99,71 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
             email: payload.email,
         },
     });
+    if (userData.status !== "ACTIVE") {
+        throw new ApiError_1.default(http_status_codes_1.default.FORBIDDEN, "User is inactive");
+    }
     const isCorrectPassword = yield bcrypt.compare(payload.password, userData.password);
     if (!isCorrectPassword) {
         throw new ApiError_1.default(http_status_codes_1.default.FORBIDDEN, "Password incorrect");
     }
     const accessToken = jwtHelpers_1.jwtHelpers.generateToken({
         email: userData.email,
+        userId: userData.id,
+        role: userData.role,
     }, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
     return {
         id: userData.id,
         name: userData.name,
         email: userData.email,
+        role: userData === null || userData === void 0 ? void 0 : userData.role,
         token: accessToken,
     };
+});
+const changePassword = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const userData = yield prisma_1.default.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+    });
+    const isCorrectPassword = yield bcrypt.compare(payload.oldPassword, userData.password);
+    if (!isCorrectPassword) {
+        throw new Error("Password incorrect");
+    }
+    if (userData.status !== "ACTIVE") {
+        throw new Error("User is not active");
+    }
+    const hashedPassword = yield bcrypt.hash(payload.newPassword, 12);
+    yield prisma_1.default.user.update({
+        where: {
+            email: userData.email,
+        },
+        data: {
+            password: hashedPassword,
+        },
+    });
+    return {
+        message: "Password changed successfully",
+    };
+});
+const updateUserStatus = (userId, status) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedUser = yield prisma_1.default.user.update({
+            where: { id: userId },
+            data: { status },
+            include: {
+                profile: true, // Include profile if needed
+            },
+        });
+        return updatedUser;
+    }
+    catch (error) {
+        console.error("Error in updateUserStatus:", error);
+        throw error;
+    }
 });
 exports.AuthServices = {
     loginUser,
     register,
+    changePassword,
+    updateUserStatus,
 };

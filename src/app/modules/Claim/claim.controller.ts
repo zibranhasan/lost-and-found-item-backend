@@ -70,9 +70,26 @@ const updateClaimStatus = async (
     next(error);
   }
 };
+const getMyClaims = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userEmail = req.user.email;
+
+    const claims = await ClaimServices.getMyClaims(userEmail);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Claims retrieved successfully!",
+      data: claims,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const claimController = {
   createClaim,
   getAllClaimFromDB,
   updateClaimStatus,
+  getMyClaims,
 };

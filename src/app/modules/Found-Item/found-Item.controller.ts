@@ -53,7 +53,49 @@ const getAllFoundItemFromDB = catchAsync(async (req, res) => {
   });
 });
 
+export const getFoundItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const foundItems = await FoundItemService.getFoundItems(req.user.email);
+    sendResponse(res, {
+      statusCode: httpStatus.ACCEPTED,
+      success: true,
+      message: "Found items retrieved successfully!",
+      data: foundItems,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getRecentFoundItemsWithFilteringController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { category, location, keyword } = req.query;
+
+    const foundItems = await FoundItemService.getRecentFoundItemsWithFiltering({
+      category: category?.toString(),
+      location: location?.toString(),
+      keyword: keyword?.toString(),
+    });
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Filtered found items fetched successfully",
+      data: foundItems,
+    });
+  } catch (error: any) {}
+};
+
 export const foundItemController = {
   createfoundItem,
   getAllFoundItemFromDB,
+  getFoundItems,
+  getRecentFoundItemsWithFilteringController,
 };

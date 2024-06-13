@@ -3,9 +3,24 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { foundItemSearchAbleFields } from "./foundItem.constant";
+import ApiError from "../../errors/ApiError";
+
+const getOrCreateCategory = async (categoryName: string) => {
+  let category = await prisma.foundItemCategory.findFirst({
+    where: { name: categoryName },
+  });
+
+  if (!category) {
+    category = await prisma.foundItemCategory.create({
+      data: { name: categoryName },
+    });
+  }
+
+  return category.id;
+};
 
 const createFoundItem = async (user: { email: string }, bodyData: any) => {
-  const { categoryId, foundItemName, description, location } = bodyData;
+  const { foundItemName, description, location, categoryName } = bodyData;
   const { email } = user;
 
   try {
@@ -28,29 +43,14 @@ const createFoundItem = async (user: { email: string }, bodyData: any) => {
       updatedAt: userUpdatedAt,
     } = existingUser;
 
-    // Retrieve the category details
-    const category = await prisma.foundItemCategory.findUnique({
-      where: {
-        id: categoryId,
-      },
-    });
-
-    if (!category) {
-      throw new Error("Category not found");
-    }
-
-    const {
-      id: categoryIdResult,
-      name: categoryName,
-      createdAt: categoryCreatedAt,
-      updatedAt: categoryUpdatedAt,
-    } = category;
+    // Get or create the category
+    const categoryId = await getOrCreateCategory(categoryName);
 
     // Create the found item
     const createdFoundItem = await prisma.foundItem.create({
       data: {
         userId,
-        categoryId: categoryIdResult,
+        categoryId,
         foundItemName,
         description,
         location,
@@ -69,10 +69,8 @@ const createFoundItem = async (user: { email: string }, bodyData: any) => {
       },
       categoryId: createdFoundItem.categoryId,
       category: {
-        id: categoryIdResult,
+        id: categoryId,
         name: categoryName,
-        createdAt: categoryCreatedAt.toISOString(),
-        updatedAt: categoryUpdatedAt.toISOString(),
       },
       foundItemName: createdFoundItem.foundItemName,
       description: createdFoundItem.description,
@@ -184,7 +182,74 @@ const getAllFoundItemFromDB = async (
   };
 };
 
+export const getFoundItems = async (email: string) => {
+  // Retrieve the user ID using the email
+  const existingUser = await prisma.user.findFirst({
+    where: { email },
+  });
+
+  if (!existingUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const { id: userId } = existingUser;
+
+  // Retrieve found items for the user
+  const foundItems = await prisma.foundItem.findMany({
+    where: { userId },
+    include: {
+      category: true, // Include category information
+    },
+  });
+
+  return foundItems;
+};
+export const getRecentFoundItemsWithFiltering = async (filters: any) => {
+  const { category, location, keyword } = filters;
+
+  try {
+    const where: any = {};
+
+    if (category) {
+      const categoryId = await getOrCreateCategory(category);
+      if (categoryId) {
+        where.categoryId = categoryId;
+      }
+    }
+
+    if (location) {
+      where.location = {
+        contains: location,
+        mode: "insensitive",
+      };
+    }
+
+    if (keyword) {
+      where.description = {
+        contains: keyword,
+        mode: "insensitive",
+      };
+    }
+
+    const foundItems = await prisma.foundItem.findMany({
+      where,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    return foundItems;
+  } catch (error) {
+    console.error("Error fetching recent found items:", error);
+  }
+};
+
 export const FoundItemService = {
   createFoundItem,
   getAllFoundItemFromDB,
+  getFoundItems,
+  getRecentFoundItemsWithFiltering,
 };

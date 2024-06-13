@@ -23,12 +23,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FoundItemService = void 0;
+exports.FoundItemService = exports.getRecentFoundItemsWithFiltering = exports.getFoundItems = void 0;
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const foundItem_constant_1 = require("./foundItem.constant");
+const ApiError_1 = __importDefault(require("../../errors/ApiError"));
+const getOrCreateCategory = (categoryName) => __awaiter(void 0, void 0, void 0, function* () {
+    let category = yield prisma_1.default.foundItemCategory.findFirst({
+        where: { name: categoryName },
+    });
+    if (!category) {
+        category = yield prisma_1.default.foundItemCategory.create({
+            data: { name: categoryName },
+        });
+    }
+    return category.id;
+});
 const createFoundItem = (user, bodyData) => __awaiter(void 0, void 0, void 0, function* () {
-    const { categoryId, foundItemName, description, location } = bodyData;
+    const { foundItemName, description, location, categoryName } = bodyData;
     const { email } = user;
     try {
         // Retrieve the user ID using the email
@@ -41,21 +53,13 @@ const createFoundItem = (user, bodyData) => __awaiter(void 0, void 0, void 0, fu
             throw new Error("User not found");
         }
         const { id: userId, name, email: userEmail, createdAt: userCreatedAt, updatedAt: userUpdatedAt, } = existingUser;
-        // Retrieve the category details
-        const category = yield prisma_1.default.foundItemCategory.findUnique({
-            where: {
-                id: categoryId,
-            },
-        });
-        if (!category) {
-            throw new Error("Category not found");
-        }
-        const { id: categoryIdResult, name: categoryName, createdAt: categoryCreatedAt, updatedAt: categoryUpdatedAt, } = category;
+        // Get or create the category
+        const categoryId = yield getOrCreateCategory(categoryName);
         // Create the found item
         const createdFoundItem = yield prisma_1.default.foundItem.create({
             data: {
                 userId,
-                categoryId: categoryIdResult,
+                categoryId,
                 foundItemName,
                 description,
                 location,
@@ -73,10 +77,8 @@ const createFoundItem = (user, bodyData) => __awaiter(void 0, void 0, void 0, fu
             },
             categoryId: createdFoundItem.categoryId,
             category: {
-                id: categoryIdResult,
+                id: categoryId,
                 name: categoryName,
-                createdAt: categoryCreatedAt.toISOString(),
-                updatedAt: categoryUpdatedAt.toISOString(),
             },
             foundItemName: createdFoundItem.foundItemName,
             description: createdFoundItem.description,
@@ -174,7 +176,66 @@ const getAllFoundItemFromDB = (params, options) => __awaiter(void 0, void 0, voi
         data: formattedFoundItems,
     };
 });
+const getFoundItems = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    // Retrieve the user ID using the email
+    const existingUser = yield prisma_1.default.user.findFirst({
+        where: { email },
+    });
+    if (!existingUser) {
+        throw new ApiError_1.default(404, "User not found");
+    }
+    const { id: userId } = existingUser;
+    // Retrieve found items for the user
+    const foundItems = yield prisma_1.default.foundItem.findMany({
+        where: { userId },
+        include: {
+            category: true, // Include category information
+        },
+    });
+    return foundItems;
+});
+exports.getFoundItems = getFoundItems;
+const getRecentFoundItemsWithFiltering = (filters) => __awaiter(void 0, void 0, void 0, function* () {
+    const { category, location, keyword } = filters;
+    try {
+        const where = {};
+        if (category) {
+            const categoryId = yield getOrCreateCategory(category);
+            if (categoryId) {
+                where.categoryId = categoryId;
+            }
+        }
+        if (location) {
+            where.location = {
+                contains: location,
+                mode: "insensitive",
+            };
+        }
+        if (keyword) {
+            where.description = {
+                contains: keyword,
+                mode: "insensitive",
+            };
+        }
+        const foundItems = yield prisma_1.default.foundItem.findMany({
+            where,
+            orderBy: {
+                createdAt: "desc",
+            },
+            include: {
+                category: true,
+            },
+        });
+        return foundItems;
+    }
+    catch (error) {
+        console.error("Error fetching recent found items:", error);
+    }
+});
+exports.getRecentFoundItemsWithFiltering = getRecentFoundItemsWithFiltering;
 exports.FoundItemService = {
     createFoundItem,
     getAllFoundItemFromDB,
+    getFoundItems: exports.getFoundItems,
+    getRecentFoundItemsWithFiltering: exports.getRecentFoundItemsWithFiltering,
 };

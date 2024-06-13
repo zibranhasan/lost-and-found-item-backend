@@ -26,6 +26,16 @@ const foundItemCategories = (0, catchAsync_1.default)((req, res) => __awaiter(vo
         data: category,
     });
 }));
+const getAllFoundItemCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const categories = yield Found_item_categories_service_1.FoundItemCategoryService.getAllFoundItemCategories();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Found item categories retrieved successfully",
+        data: categories,
+    });
+}));
 exports.foundItemCategoriesController = {
     foundItemCategories,
+    getAllFoundItemCategories,
 };

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.foundItemValidation = void 0;
 const zod_1 = require("zod");
 const createFoundItemSchema = zod_1.z.object({
-    categoryId: zod_1.z.string(),
+    categoryName: zod_1.z.string(),
     foundItemName: zod_1.z.string(),
     description: zod_1.z.string(),
     location: zod_1.z.string(),

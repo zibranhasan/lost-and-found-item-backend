@@ -25,6 +25,12 @@ const createFoundItemCategory = async (data: any) => {
   return createdCategory;
 };
 
+const getAllFoundItemCategories = async () => {
+  const categories = await prisma.foundItemCategory.findMany();
+  return categories;
+};
+
 export const FoundItemCategoryService = {
   createFoundItemCategory,
+  getAllFoundItemCategories,
 };

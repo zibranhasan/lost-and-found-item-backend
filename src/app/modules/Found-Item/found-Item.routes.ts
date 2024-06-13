@@ -12,7 +12,11 @@ router.post(
   validateRequest(foundItemValidation.createFoundItemSchema),
   foundItemController.createfoundItem
 );
-
+router.get(
+  "/found-itemsWithFiltering",
+  foundItemController.getRecentFoundItemsWithFilteringController
+);
 router.get("/found-items", foundItemController.getAllFoundItemFromDB);
+router.get("/myFound-items", auth(), foundItemController.getFoundItems);
 
 export const FoundItemsRoutes = router;

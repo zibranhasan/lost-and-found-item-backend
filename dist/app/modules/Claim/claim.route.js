@@ -13,4 +13,5 @@ const router = express_1.default.Router();
 router.post("/claims", (0, auth_1.default)(), (0, validateRequest_1.default)(claim_validation_1.claimValidation.createClaimSchema), claim_controller_1.claimController.createClaim);
 router.get("/claims", (0, auth_1.default)(), claim_controller_1.claimController.getAllClaimFromDB);
 router.put("/claims/:claimId", (0, auth_1.default)(), (0, validateRequest_1.default)(claim_validation_1.claimValidation.updateClaimStatusSchema), claim_controller_1.claimController.updateClaimStatus);
+router.get("/myClaims", (0, auth_1.default)(), claim_controller_1.claimController.getMyClaims);
 exports.ClaimRoutes = router;

@@ -34,6 +34,11 @@ const createFoundItemCategory = (data) => __awaiter(void 0, void 0, void 0, func
     });
     return createdCategory;
 });
+const getAllFoundItemCategories = () => __awaiter(void 0, void 0, void 0, function* () {
+    const categories = yield prisma_1.default.foundItemCategory.findMany();
+    return categories;
+});
 exports.FoundItemCategoryService = {
     createFoundItemCategory,
+    getAllFoundItemCategories,
 };

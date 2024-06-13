@@ -154,8 +154,46 @@ const updateClaimStatus = async (
     );
   }
 };
+
+const getMyClaims = async (email: string) => {
+  try {
+    // Find the user by email
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const userId = user.id;
+
+    // Retrieve claims associated with the user ID
+    const claims = await prisma.claim.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        foundItem: {
+          include: {
+            user: true,
+            category: true,
+          },
+        },
+      },
+    });
+
+    return claims;
+  } catch (error) {
+    console.error("Error retrieving claims:", error);
+    throw error;
+  }
+};
 export const ClaimServices = {
   createClaim,
   getClaims,
   updateClaimStatus,
+  getMyClaims,
 };

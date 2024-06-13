@@ -16,6 +16,22 @@ const foundItemCategories = catchAsync(async (req: Request, res: Response) => {
     data: category,
   });
 });
+
+const getAllFoundItemCategories = catchAsync(
+  async (req: Request, res: Response) => {
+    const categories =
+      await FoundItemCategoryService.getAllFoundItemCategories();
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Found item categories retrieved successfully",
+      data: categories,
+    });
+  }
+);
+
 export const foundItemCategoriesController = {
   foundItemCategories,
+  getAllFoundItemCategories,
 };

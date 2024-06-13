@@ -36,7 +36,33 @@ const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
         data: Object.assign({}, result),
     });
 }));
+const changePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = req.user;
+    const result = yield auth_service_1.AuthServices.changePassword(user, req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 202,
+        success: true,
+        message: "Password changed successfully",
+        data: result,
+    });
+}));
+const updateUserStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const { status } = req.body;
+    try {
+        const updatedUser = yield auth_service_1.AuthServices.updateUserStatus(userId, status);
+        (0, sendResponse_1.default)(res, {
+            statusCode: 202,
+            success: true,
+            message: "User status updated successfully",
+            data: updatedUser,
+        });
+    }
+    catch (error) { }
+});
 exports.AuthController = {
     loginUser,
     register,
+    changePassword,
+    updateUserStatus,
 };

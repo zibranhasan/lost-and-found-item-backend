@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.foundItemController = exports.createfoundItem = void 0;
+exports.foundItemController = exports.getFoundItems = exports.createfoundItem = void 0;
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const found_Item_service_1 = require("./found-Item.service");
@@ -49,7 +49,41 @@ const getAllFoundItemFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: result.data,
     });
 }));
+const getFoundItems = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const foundItems = yield found_Item_service_1.FoundItemService.getFoundItems(req.user.email);
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.default.ACCEPTED,
+            success: true,
+            message: "Found items retrieved successfully!",
+            data: foundItems,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getFoundItems = getFoundItems;
+const getRecentFoundItemsWithFilteringController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { category, location, keyword } = req.query;
+        const foundItems = yield found_Item_service_1.FoundItemService.getRecentFoundItemsWithFiltering({
+            category: category === null || category === void 0 ? void 0 : category.toString(),
+            location: location === null || location === void 0 ? void 0 : location.toString(),
+            keyword: keyword === null || keyword === void 0 ? void 0 : keyword.toString(),
+        });
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.default.OK,
+            success: true,
+            message: "Filtered found items fetched successfully",
+            data: foundItems,
+        });
+    }
+    catch (error) { }
+});
 exports.foundItemController = {
     createfoundItem: exports.createfoundItem,
     getAllFoundItemFromDB,
+    getFoundItems: exports.getFoundItems,
+    getRecentFoundItemsWithFilteringController,
 };

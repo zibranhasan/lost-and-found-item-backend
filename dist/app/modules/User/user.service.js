@@ -113,7 +113,12 @@ const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         throw new ApiError_1.default(http_status_codes_1.default.BAD_REQUEST, "Failed in updating!");
     }
 });
+const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
+    const users = yield prisma_1.default.user.findMany();
+    return users;
+});
 exports.UserServices = {
     getProfile,
     updateProfile,
+    getAllUsers,
 };

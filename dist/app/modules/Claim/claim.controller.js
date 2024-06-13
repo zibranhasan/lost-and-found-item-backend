@@ -67,8 +67,24 @@ const updateClaimStatus = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         next(error);
     }
 });
+const getMyClaims = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userEmail = req.user.email;
+        const claims = yield claim_service_1.ClaimServices.getMyClaims(userEmail);
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.default.OK,
+            success: true,
+            message: "Claims retrieved successfully!",
+            data: claims,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
 exports.claimController = {
     createClaim,
     getAllClaimFromDB,
     updateClaimStatus,
+    getMyClaims,
 };

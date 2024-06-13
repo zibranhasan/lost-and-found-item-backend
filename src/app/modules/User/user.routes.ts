@@ -9,10 +9,11 @@ const router = express.Router();
 
 router.get("/my-profile", auth(), userController.getProfileFromDB);
 router.put(
-  "/my-profile",
+  "/UpdateMy-profile",
   auth(),
   validateRequest(userValidation.userUpdateSchema),
   userController.updateUserProfileFromDB
 );
+router.get("/users", userController.getAllUsers);
 
 export const userRoutes = router;

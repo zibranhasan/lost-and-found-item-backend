@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const createFoundItemSchema = z.object({
-  categoryId: z.string(),
+  categoryName: z.string(),
   foundItemName: z.string(),
   description: z.string(),
   location: z.string(),

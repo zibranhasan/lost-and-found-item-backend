@@ -11,5 +11,7 @@ const validateRequest_1 = __importDefault(require("../../middlewares/validateReq
 const found_item_validation_1 = require("./found-item.validation");
 const router = express_1.default.Router();
 router.post("/found-items", (0, auth_1.default)(), (0, validateRequest_1.default)(found_item_validation_1.foundItemValidation.createFoundItemSchema), found_Item_controller_1.foundItemController.createfoundItem);
+router.get("/found-itemsWithFiltering", found_Item_controller_1.foundItemController.getRecentFoundItemsWithFilteringController);
 router.get("/found-items", found_Item_controller_1.foundItemController.getAllFoundItemFromDB);
+router.get("/myFound-items", (0, auth_1.default)(), found_Item_controller_1.foundItemController.getFoundItems);
 exports.FoundItemsRoutes = router;

@@ -12,5 +12,10 @@ router.post(
   validateRequest(foundItemCategoryValidation.createFoundItemCategorySchema),
   foundItemCategoriesController.foundItemCategories
 );
+router.get(
+  "/found-item-categories",
+  auth(),
+  foundItemCategoriesController.getAllFoundItemCategories
+);
 
 export const FoundItemCategoryRoutes = router;

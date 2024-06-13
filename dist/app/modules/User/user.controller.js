@@ -36,7 +36,19 @@ const updateUserProfileFromDB = (0, catchAsync_1.default)((req, res) => __awaite
         data: result,
     });
 }));
+const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield user_service_1.UserServices.getAllUsers();
+        res.status(http_status_codes_1.default.OK).json({
+            success: true,
+            message: "Users retrieved successfully",
+            data: users,
+        });
+    }
+    catch (error) { }
+});
 exports.userController = {
     getProfileFromDB,
     updateUserProfileFromDB,
+    getAllUsers,
 };

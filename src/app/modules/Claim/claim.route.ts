@@ -20,5 +20,6 @@ router.put(
   validateRequest(claimValidation.updateClaimStatusSchema),
   claimController.updateClaimStatus
 );
+router.get("/myClaims", auth(), claimController.getMyClaims);
 
 export const ClaimRoutes = router;

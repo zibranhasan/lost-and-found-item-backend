@@ -11,7 +11,6 @@ const register = async (data: any) => {
     const { name, email, password, profile } = data;
 
     const hashedPassword: string = await bcrypt.hash(password, 12);
-    console.log(hashedPassword);
 
     const result = await prisma.$transaction(async (transactionClient) => {
       const createdUserData = await transactionClient.user.create({
@@ -41,6 +40,7 @@ const register = async (data: any) => {
         id: createdUserData.id,
         name: createdUserData.name,
         email: createdUserData.email,
+        status: createdUserData.status,
         createdAt: createdUserData.createdAt.toISOString(),
         updatedAt: createdUserData.updatedAt.toISOString(),
         profile: {
@@ -68,6 +68,10 @@ const loginUser = async (payload: { email: string; password: string }) => {
     },
   });
 
+  if (userData.status !== "ACTIVE") {
+    throw new ApiError(httpStatus.FORBIDDEN, "User is inactive");
+  }
+
   const isCorrectPassword = await bcrypt.compare(
     payload.password,
     userData.password
@@ -80,6 +84,8 @@ const loginUser = async (payload: { email: string; password: string }) => {
   const accessToken = jwtHelpers.generateToken(
     {
       email: userData.email,
+      userId: userData.id,
+      role: userData.role,
     },
     config.jwt.jwt_secret as string,
     config.jwt.expires_in as string
@@ -89,11 +95,70 @@ const loginUser = async (payload: { email: string; password: string }) => {
     id: userData.id,
     name: userData.name,
     email: userData.email,
+    role: userData?.role,
     token: accessToken,
   };
+};
+
+const changePassword = async (user: any, payload: any) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user.email,
+    },
+  });
+
+  const isCorrectPassword = await bcrypt.compare(
+    payload.oldPassword,
+    userData.password
+  );
+
+  if (!isCorrectPassword) {
+    throw new Error("Password incorrect");
+  }
+
+  if (userData.status !== "ACTIVE") {
+    throw new Error("User is not active");
+  }
+
+  const hashedPassword = await bcrypt.hash(payload.newPassword, 12);
+
+  await prisma.user.update({
+    where: {
+      email: userData.email,
+    },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return {
+    message: "Password changed successfully",
+  };
+};
+
+const updateUserStatus = async (
+  userId: string,
+  status: "ACTIVE" | "INACTIVE"
+) => {
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { status },
+      include: {
+        profile: true, // Include profile if needed
+      },
+    });
+
+    return updatedUser;
+  } catch (error) {
+    console.error("Error in updateUserStatus:", error);
+    throw error;
+  }
 };
 
 export const AuthServices = {
   loginUser,
   register,
+  changePassword,
+  updateUserStatus,
 };

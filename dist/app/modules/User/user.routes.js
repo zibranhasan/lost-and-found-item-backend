@@ -11,5 +11,6 @@ const validateRequest_1 = __importDefault(require("../../middlewares/validateReq
 const user_validation_1 = require("./user.validation");
 const router = express_1.default.Router();
 router.get("/my-profile", (0, auth_1.default)(), user_controller_1.userController.getProfileFromDB);
-router.put("/my-profile", (0, auth_1.default)(), (0, validateRequest_1.default)(user_validation_1.userValidation.userUpdateSchema), user_controller_1.userController.updateUserProfileFromDB);
+router.put("/UpdateMy-profile", (0, auth_1.default)(), (0, validateRequest_1.default)(user_validation_1.userValidation.userUpdateSchema), user_controller_1.userController.updateUserProfileFromDB);
+router.get("/users", user_controller_1.userController.getAllUsers);
 exports.userRoutes = router;

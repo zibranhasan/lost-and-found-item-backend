@@ -109,7 +109,13 @@ const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
+const getAllUsers = async (): Promise<any> => {
+  const users = await prisma.user.findMany();
+  return users;
+};
+
 export const UserServices = {
   getProfile,
   updateProfile,
+  getAllUsers,
 };
