@@ -10,7 +10,7 @@ router.get(
   "/lost-itemsWithFiltering",
   lostItemController.getRecentLostItemsWithFilteringController
 );
-router.get("/lost-items/:lostId", auth(), lostItemController.getLostItemById);
+router.get("/lost-items/:lostId", lostItemController.getLostItemById);
 router.get("/lost-items/user", auth(), lostItemController.getUserLostItems);
 router.get("/my-lost-items", auth(), lostItemController.getMyLostItems);
 

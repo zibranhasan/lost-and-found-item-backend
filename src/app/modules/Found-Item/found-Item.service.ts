@@ -20,7 +20,8 @@ const getOrCreateCategory = async (categoryName: string) => {
 };
 
 const createFoundItem = async (user: { email: string }, bodyData: any) => {
-  const { foundItemName, description, location, categoryName } = bodyData;
+  const { foundItemName, photo, description, location, categoryName } =
+    bodyData;
   const { email } = user;
 
   try {
@@ -52,6 +53,7 @@ const createFoundItem = async (user: { email: string }, bodyData: any) => {
         userId,
         categoryId,
         foundItemName,
+        photo,
         description,
         location,
       },
@@ -73,6 +75,7 @@ const createFoundItem = async (user: { email: string }, bodyData: any) => {
         name: categoryName,
       },
       foundItemName: createdFoundItem.foundItemName,
+      photo: createdFoundItem.photo,
       description: createdFoundItem.description,
       location: createdFoundItem.location,
       createdAt: createdFoundItem.createdAt.toISOString(),
@@ -157,6 +160,7 @@ const getAllFoundItemFromDB = async (
   const formattedFoundItems = foundItems.map((foundItem) => ({
     id: foundItem.id,
     foundItemName: foundItem.foundItemName,
+    photo: foundItem.photo,
     description: foundItem.description,
     location: foundItem.location,
     createdAt: foundItem.createdAt.toISOString(),
@@ -246,10 +250,51 @@ export const getRecentFoundItemsWithFiltering = async (filters: any) => {
     console.error("Error fetching recent found items:", error);
   }
 };
+const getFoundItemById = async (id: string) => {
+  try {
+    const foundItem = await prisma.foundItem.findUniqueOrThrow({
+      where: { id },
+      include: {
+        user: true,
+        category: true,
+      },
+    });
 
+    if (!foundItem) {
+      return null;
+    }
+
+    return {
+      id: foundItem.id,
+      userId: foundItem.userId,
+      user: {
+        id: foundItem.user.id,
+        name: foundItem.user.name,
+        email: foundItem.user.email,
+        createdAt: foundItem.user.createdAt.toISOString(),
+        updatedAt: foundItem.user.updatedAt.toISOString(),
+      },
+      categoryId: foundItem.categoryId,
+      category: {
+        id: foundItem.category.id,
+        name: foundItem.category.name,
+      },
+      foundItemName: foundItem.foundItemName,
+      photo: foundItem.photo,
+      description: foundItem.description,
+      location: foundItem.location,
+      createdAt: foundItem.createdAt.toISOString(),
+      updatedAt: foundItem.updatedAt.toISOString(),
+    };
+  } catch (error) {
+    console.error("Error fetching found item:", error);
+    throw error;
+  }
+};
 export const FoundItemService = {
   createFoundItem,
   getAllFoundItemFromDB,
   getFoundItems,
   getRecentFoundItemsWithFiltering,
+  getFoundItemById,
 };

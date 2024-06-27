@@ -23,7 +23,7 @@ const createfoundItem = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
     try {
         const user = req.user;
         const bodyData = req.body;
-        console.log("body data", bodyData);
+        // console.log("body data", bodyData);
         const createdFoundItem = yield found_Item_service_1.FoundItemService.createFoundItem(user, bodyData);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_codes_1.default.CREATED,

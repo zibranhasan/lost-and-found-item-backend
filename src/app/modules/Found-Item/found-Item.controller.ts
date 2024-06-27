@@ -22,7 +22,7 @@ export const createfoundItem = async (
     const user = req.user;
     const bodyData = req.body;
 
-    console.log("body data", bodyData);
+    // console.log("body data", bodyData);
     const createdFoundItem = await FoundItemService.createFoundItem(
       user,
       bodyData
@@ -93,9 +93,39 @@ const getRecentFoundItemsWithFilteringController = async (
   } catch (error: any) {}
 };
 
+const getFoundItemById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { foundId } = req.params;
+
+    const foundItem = await FoundItemService.getFoundItemById(foundId);
+
+    if (!foundItem) {
+      return res.status(httpStatus.NOT_FOUND).send({
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: "Found item not found",
+      });
+    }
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Found item retrieved successfully",
+      data: foundItem,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const foundItemController = {
   createfoundItem,
   getAllFoundItemFromDB,
   getFoundItems,
   getRecentFoundItemsWithFilteringController,
+  getFoundItemById,
 };

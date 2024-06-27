@@ -16,6 +16,7 @@ router.get(
   "/found-itemsWithFiltering",
   foundItemController.getRecentFoundItemsWithFilteringController
 );
+router.get("/found-items/:foundId", foundItemController.getFoundItemById);
 router.get("/found-items", foundItemController.getAllFoundItemFromDB);
 router.get("/myFound-items", auth(), foundItemController.getFoundItems);
 

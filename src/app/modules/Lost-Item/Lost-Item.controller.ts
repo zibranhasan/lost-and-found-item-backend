@@ -5,10 +5,12 @@ import sendResponse from "../../../shared/sendResponse";
 
 export const createLostItem = async (req: Request, res: Response) => {
   try {
-    const { userId, categoryName, name, description, location } = req.body;
+    const { userId, photo, categoryName, name, description, location } =
+      req.body;
 
     const newLostItem = await lostItemService.createLostItem({
       userId,
+      photo,
       categoryName,
       name,
       description,

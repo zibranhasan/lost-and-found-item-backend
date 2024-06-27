@@ -48,6 +48,7 @@ model FoundItem {
   category      FoundItemCategory @relation(fields: [categoryId], references: [id])
   categoryId    String
   foundItemName String
+  photo         String?
   description   String
   location      String
   createdAt     DateTime    @default(now())
@@ -63,6 +64,7 @@ model LostItem {
   category      FoundItemCategory    @relation(fields: [categoryId], references: [id])
   categoryId    String
   name          String
+  photo         String?
   description   String
   location      String
   createdAt     DateTime    @default(now())

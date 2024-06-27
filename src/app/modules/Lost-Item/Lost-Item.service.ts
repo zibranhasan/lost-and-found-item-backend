@@ -22,7 +22,7 @@ const getOrCreateCategory = async (categoryName: string) => {
 };
 
 const createLostItem = async (data: any) => {
-  const { userId, categoryName, name, description, location } = data;
+  const { userId, categoryName, photo, name, description, location } = data;
 
   try {
     // Get or create the category
@@ -34,6 +34,7 @@ const createLostItem = async (data: any) => {
         userId,
         categoryId,
         name,
+        photo,
         description,
         location,
       },
