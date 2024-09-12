@@ -1,199 +1,121 @@
 import httpStatus from "http-status-codes";
 import ApiError from "../../errors/ApiError";
 import prisma from "../../../shared/prisma";
-import { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 
 interface CreateClaimData {
   email: string;
   foundItemId: string;
   distinguishingFeatures: string;
   lostDate: Date;
+  verificationMethod: string;
+  verificationDetails?: string;
+  contactInformation?: string;
 }
 
 const createClaim = async (data: CreateClaimData) => {
-  try {
-    const { email, foundItemId, distinguishingFeatures, lostDate } = data;
+  const {
+    email,
+    foundItemId,
+    distinguishingFeatures,
+    lostDate,
+    verificationMethod,
+    verificationDetails,
+    contactInformation,
+  } = data;
 
-    // Retrieve the user ID using the email
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        email,
-      },
-    });
+  const existingUser = await prisma.user.findFirst({
+    where: { email },
+  });
 
-    if (!existingUser) {
-      throw new Error("User not found");
-    }
-
-    const { id: userId } = existingUser;
-
-    // Check if the found item exists
-    const foundItem = await prisma.foundItem.findUnique({
-      where: {
-        id: foundItemId,
-      },
-    });
-
-    if (!foundItem) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Found item not found");
-    }
-
-    // Create the claim
-    const createdClaim = await prisma.claim.create({
-      data: {
-        userId, // Include userId here
-        foundItemId,
-        distinguishingFeatures,
-        lostDate,
-        status: "PENDING",
-      },
-    });
-
-    return createdClaim;
-  } catch (error) {
-    // Handle any errors
-    console.error("Error creating claim:", error);
-    throw error; // Re-throw the error to be handled by the caller
+  if (!existingUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
+
+  const foundItem = await prisma.foundItem.findUnique({
+    where: { id: foundItemId },
+  });
+
+  if (!foundItem) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Found item not found");
+  }
+
+  const createdClaim = await prisma.claim.create({
+    data: {
+      userId: existingUser.id,
+      foundItemId,
+      distinguishingFeatures,
+      lostDate,
+      verificationMethod,
+      verificationDetails,
+      contactInformation,
+      status: "PENDING",
+    },
+  });
+
+  return createdClaim;
 };
-const getClaims = async (req: Request, res: Response) => {
-  try {
-    const result = await prisma.claim.findMany({
-      include: {
-        foundItem: {
-          include: {
-            user: true,
-            category: true,
-          },
-        },
+
+const getAllClaims = async () => {
+  const claims = await prisma.claim.findMany({
+    include: {
+      foundItem: {
+        include: { user: true, category: true },
       },
-    });
-
-    const formattedClaims = result.map((claim) => {
-      const {
-        id,
-        userId,
-        foundItemId: claimFoundItemId, // Rename the variable here
-        distinguishingFeatures,
-        lostDate,
-        status,
-        createdAt,
-        updatedAt,
-        foundItem: {
-          id: foundItemId,
-          userId: foundItemUserId,
-          categoryId,
-          foundItemName,
-          description,
-          location,
-          createdAt: foundItemCreatedAt,
-          updatedAt: foundItemUpdatedAt,
-          user,
-          category,
-        },
-      } = claim;
-
-      return {
-        id,
-        userId,
-        foundItemId: claimFoundItemId, // Use the renamed variable here
-        distinguishingFeatures,
-        lostDate,
-        status,
-        createdAt,
-        updatedAt,
-        foundItem: {
-          id: foundItemId,
-          userId: foundItemUserId,
-          categoryId,
-          foundItemName,
-          description,
-          location,
-          createdAt: foundItemCreatedAt,
-          updatedAt: foundItemUpdatedAt,
-          user,
-          category,
-        },
-      };
-    });
-    return formattedClaims;
-  } catch (error) {}
+    },
+  });
+  return claims;
 };
 
-const updateClaimStatus = async (
+const updateClaimFields = async (
   claimId: string,
-  status: string
-): Promise<any> => {
-  try {
-    // Update the claim status in the database
-    const updatedClaim = await prisma.claim.update({
-      where: {
-        id: claimId,
-      },
-      data: {
-        status,
-      },
-      // Optionally include additional fields to be returned in the response
-      select: {
-        id: true,
-        userId: true,
-        foundItemId: true,
-        distinguishingFeatures: true,
-        lostDate: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  data: Partial<Prisma.ClaimUpdateInput>
+) => {
+  // Validate if the claim exists before updating
+  const existingClaim = await prisma.claim.findUnique({
+    where: { id: claimId },
+  });
 
-    return updatedClaim;
-  } catch (error) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "There are issues updaeting claim"
-    );
+  if (!existingClaim) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Claim not found");
   }
+
+  // Update the claim with the provided data
+  const updatedClaim = await prisma.claim.update({
+    where: { id: claimId },
+    data, // This will update only the fields provided in `data`
+  });
+
+  return updatedClaim;
 };
 
 const getMyClaims = async (email: string) => {
-  try {
-    // Find the user by email
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const userId = user.id;
-
-    // Retrieve claims associated with the user ID
-    const claims = await prisma.claim.findMany({
-      where: {
-        userId,
-      },
-      include: {
-        foundItem: {
-          include: {
-            user: true,
-            category: true,
-          },
-        },
-      },
-    });
-
-    return claims;
-  } catch (error) {
-    console.error("Error retrieving claims:", error);
-    throw error;
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
+
+  const claims = await prisma.claim.findMany({
+    where: { userId: user.id },
+    include: { foundItem: true },
+  });
+
+  return claims;
 };
+
+const deleteClaim = async (claimId: string) => {
+  await prisma.claim.delete({
+    where: { id: claimId },
+  });
+};
+
 export const ClaimServices = {
   createClaim,
-  getClaims,
-  updateClaimStatus,
+  getAllClaims,
+  updateClaimFields,
   getMyClaims,
+  deleteClaim,
 };

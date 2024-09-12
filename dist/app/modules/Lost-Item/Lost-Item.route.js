@@ -11,7 +11,7 @@ const router = express_1.default.Router();
 router.post("/lost-items", (0, auth_1.default)(), Lost_Item_controller_1.lostItemController.createLostItem);
 router.get("/lost-items/recent", Lost_Item_controller_1.lostItemController.getRecentLostItems);
 router.get("/lost-itemsWithFiltering", Lost_Item_controller_1.lostItemController.getRecentLostItemsWithFilteringController);
-router.get("/lost-items/:lostId", (0, auth_1.default)(), Lost_Item_controller_1.lostItemController.getLostItemById);
+router.get("/lost-items/:lostId", Lost_Item_controller_1.lostItemController.getLostItemById);
 router.get("/lost-items/user", (0, auth_1.default)(), Lost_Item_controller_1.lostItemController.getUserLostItems);
 router.get("/my-lost-items", (0, auth_1.default)(), Lost_Item_controller_1.lostItemController.getMyLostItems);
 exports.LostItemsRoutes = router;

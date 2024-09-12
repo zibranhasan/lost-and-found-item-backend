@@ -4,26 +4,26 @@ import { Request, Response, NextFunction } from "express";
 import { ClaimServices } from "./claim.service";
 import catchAsync from "../../../shared/catchAsync";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user: any; // Change 'any' to the actual type of your user object
-    }
-  }
-}
 const createClaim = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
-    const { foundItemId, distinguishingFeatures, lostDate } = req.body;
+    const {
+      foundItemId,
+      distinguishingFeatures,
+      lostDate,
+      verificationMethod,
+      verificationDetails,
+      contactInformation,
+    } = req.body;
 
-    console.log("user in claim", user);
-
-    // Create the claim using the provided data
     const claim = await ClaimServices.createClaim({
       email: user.email,
       foundItemId,
       distinguishingFeatures,
       lostDate,
+      verificationMethod,
+      verificationDetails,
+      contactInformation,
     });
 
     sendResponse(res, {
@@ -37,8 +37,8 @@ const createClaim = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getAllClaimFromDB = catchAsync(async (req: Request, res: Response) => {
-  const result = await ClaimServices.getClaims(req, res);
+const getAllClaims = catchAsync(async (req: Request, res: Response) => {
+  const result = await ClaimServices.getAllClaims();
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -47,49 +47,48 @@ const getAllClaimFromDB = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateClaimStatus = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const claimId = req.params.claimId;
-    const { status } = req.body;
+const updateClaimStatus = catchAsync(async (req: Request, res: Response) => {
+  const { claimId } = req.params;
+  const data = req.body; // Assume that data contains the fields you want to update
 
-    // Update the claim status
-    const updatedClaim = await ClaimServices.updateClaimStatus(claimId, status);
+  const updatedClaim = await ClaimServices.updateClaimFields(claimId, data);
 
-    // Send success response with the updated claim data
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Claim updated successfully",
-      data: updatedClaim,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-const getMyClaims = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userEmail = req.user.email;
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Claim updated successfully",
+    data: updatedClaim,
+  });
+});
 
-    const claims = await ClaimServices.getMyClaims(userEmail);
+const getMyClaims = catchAsync(async (req: Request, res: Response) => {
+  const userEmail = req.user.email;
+  const claims = await ClaimServices.getMyClaims(userEmail);
 
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Claims retrieved successfully!",
-      data: claims,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Claims retrieved successfully!",
+    data: claims,
+  });
+});
+
+const deleteClaim = catchAsync(async (req: Request, res: Response) => {
+  const { claimId } = req.params;
+  await ClaimServices.deleteClaim(claimId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Claim deleted successfully",
+    data: [],
+  });
+});
 
 export const claimController = {
   createClaim,
-  getAllClaimFromDB,
+  getAllClaims,
   updateClaimStatus,
   getMyClaims,
+  deleteClaim,
 };

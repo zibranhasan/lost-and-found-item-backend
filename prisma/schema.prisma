@@ -79,12 +79,16 @@ model Claim {
   foundItem             FoundItem   @relation(fields: [foundItemId], references: [id])
   foundItemId           String
   status                String      @default("PENDING")
-  distinguishingFeatures String
-  lostDate              DateTime
+  distinguishingFeatures String      // Detailed description of the item to verify ownership
+  lostDate              DateTime    // Date when the item was lost
+  verificationMethod    String?     // Method used for verifying ownership (e.g., photos, documents)
+  verificationDetails   String?     // Additional details or notes on verification
+  contactInformation     String?     // Contact info of claimant
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
-   @@map("claims")
 }
+
+
 
 model UserProfile {
   id        String      @id @default(uuid())

@@ -40,7 +40,7 @@ const getOrCreateCategory = (categoryName) => __awaiter(void 0, void 0, void 0, 
     return category.id;
 });
 const createFoundItem = (user, bodyData) => __awaiter(void 0, void 0, void 0, function* () {
-    const { foundItemName, description, location, categoryName } = bodyData;
+    const { foundItemName, photo, description, location, categoryName } = bodyData;
     const { email } = user;
     try {
         // Retrieve the user ID using the email
@@ -61,6 +61,7 @@ const createFoundItem = (user, bodyData) => __awaiter(void 0, void 0, void 0, fu
                 userId,
                 categoryId,
                 foundItemName,
+                photo,
                 description,
                 location,
             },
@@ -81,6 +82,7 @@ const createFoundItem = (user, bodyData) => __awaiter(void 0, void 0, void 0, fu
                 name: categoryName,
             },
             foundItemName: createdFoundItem.foundItemName,
+            photo: createdFoundItem.photo,
             description: createdFoundItem.description,
             location: createdFoundItem.location,
             createdAt: createdFoundItem.createdAt.toISOString(),
@@ -153,6 +155,7 @@ const getAllFoundItemFromDB = (params, options) => __awaiter(void 0, void 0, voi
     const formattedFoundItems = foundItems.map((foundItem) => ({
         id: foundItem.id,
         foundItemName: foundItem.foundItemName,
+        photo: foundItem.photo,
         description: foundItem.description,
         location: foundItem.location,
         createdAt: foundItem.createdAt.toISOString(),
@@ -233,9 +236,50 @@ const getRecentFoundItemsWithFiltering = (filters) => __awaiter(void 0, void 0, 
     }
 });
 exports.getRecentFoundItemsWithFiltering = getRecentFoundItemsWithFiltering;
+const getFoundItemById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const foundItem = yield prisma_1.default.foundItem.findUniqueOrThrow({
+            where: { id },
+            include: {
+                user: true,
+                category: true,
+            },
+        });
+        if (!foundItem) {
+            return null;
+        }
+        return {
+            id: foundItem.id,
+            userId: foundItem.userId,
+            user: {
+                id: foundItem.user.id,
+                name: foundItem.user.name,
+                email: foundItem.user.email,
+                createdAt: foundItem.user.createdAt.toISOString(),
+                updatedAt: foundItem.user.updatedAt.toISOString(),
+            },
+            categoryId: foundItem.categoryId,
+            category: {
+                id: foundItem.category.id,
+                name: foundItem.category.name,
+            },
+            foundItemName: foundItem.foundItemName,
+            photo: foundItem.photo,
+            description: foundItem.description,
+            location: foundItem.location,
+            createdAt: foundItem.createdAt.toISOString(),
+            updatedAt: foundItem.updatedAt.toISOString(),
+        };
+    }
+    catch (error) {
+        console.error("Error fetching found item:", error);
+        throw error;
+    }
+});
 exports.FoundItemService = {
     createFoundItem,
     getAllFoundItemFromDB,
     getFoundItems: exports.getFoundItems,
     getRecentFoundItemsWithFiltering: exports.getRecentFoundItemsWithFiltering,
+    getFoundItemById,
 };

@@ -32,7 +32,7 @@ const getOrCreateCategory = (categoryName) => __awaiter(void 0, void 0, void 0, 
     return category.id;
 });
 const createLostItem = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, categoryName, name, description, location } = data;
+    const { userId, categoryName, photo, name, description, location } = data;
     try {
         // Get or create the category
         const categoryId = yield getOrCreateCategory(categoryName);
@@ -42,6 +42,7 @@ const createLostItem = (data) => __awaiter(void 0, void 0, void 0, function* () 
                 userId,
                 categoryId,
                 name,
+                photo,
                 description,
                 location,
             },

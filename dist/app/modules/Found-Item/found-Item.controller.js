@@ -81,9 +81,32 @@ const getRecentFoundItemsWithFilteringController = (req, res) => __awaiter(void 
     }
     catch (error) { }
 });
+const getFoundItemById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { foundId } = req.params;
+        const foundItem = yield found_Item_service_1.FoundItemService.getFoundItemById(foundId);
+        if (!foundItem) {
+            return res.status(http_status_codes_1.default.NOT_FOUND).send({
+                statusCode: http_status_codes_1.default.NOT_FOUND,
+                success: false,
+                message: "Found item not found",
+            });
+        }
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.default.OK,
+            success: true,
+            message: "Found item retrieved successfully",
+            data: foundItem,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
 exports.foundItemController = {
     createfoundItem: exports.createfoundItem,
     getAllFoundItemFromDB,
     getFoundItems: exports.getFoundItems,
     getRecentFoundItemsWithFilteringController,
+    getFoundItemById,
 };

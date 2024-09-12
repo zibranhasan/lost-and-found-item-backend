@@ -1,25 +1,23 @@
 import express from "express";
-
 import auth from "../../middlewares/auth";
 import { claimController } from "./claim.controller";
-import validateRequest from "../../middlewares/validateRequest";
-import { claimValidation } from "./claim.validation";
 
 const router = express.Router();
 
 router.post(
   "/claims",
   auth(),
-  validateRequest(claimValidation.createClaimSchema),
+  // validateRequest(claimValidation.createClaimSchema),
   claimController.createClaim
 );
-router.get("/claims", auth(), claimController.getAllClaimFromDB);
-router.put(
-  "/claims/:claimId",
-  auth(),
-  validateRequest(claimValidation.updateClaimStatusSchema),
-  claimController.updateClaimStatus
-);
+
+router.get("/claims", auth(), claimController.getAllClaims);
+
+router.put("/claims/:claimId", auth(), claimController.updateClaimStatus);
+
 router.get("/myClaims", auth(), claimController.getMyClaims);
+
+// Delete claim route
+router.delete("/claims/:claimId", auth(), claimController.deleteClaim);
 
 export const ClaimRoutes = router;

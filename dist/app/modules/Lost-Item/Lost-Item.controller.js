@@ -18,9 +18,10 @@ const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const createLostItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userId, categoryName, name, description, location } = req.body;
+        const { userId, photo, categoryName, name, description, location } = req.body;
         const newLostItem = yield Lost_Item_service_1.lostItemService.createLostItem({
             userId,
+            photo,
             categoryName,
             name,
             description,
