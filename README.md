@@ -1,54 +1,49 @@
-# Assignment 8
+# 🛠️ Lost & Found Website
 
-## Project Overview
+This repository contains the codebase for a **Lost & Found** web application that helps users report and claim lost items. It features user and admin management, an item claim process, and a comprehensive list of found items.
 
-Assignment 8 is a Node.js application.
+## 🚀 Features
 
-## Live Demo
+- **User Authentication**
+  - Users can sign up and log in to report or claim lost items.
+  - Admins have enhanced permissions to manage items and claims.
+  
+- **Found Items Management**
+  - Users can browse through all found items, with the ability to filter by category and other criteria.
+  - Each item is displayed in a consistent card format with fixed image size and a "Claim" button.
 
-You can access the live demo of the application at Live Demo URL:https://assignment-lac-seven.vercel.app
+- **Claim Process**
+  - Users can claim an item by providing verification details.
+  - Claim requests include fields such as distinguishing features, date lost, verification method, and contact information.
 
-## Features
-1.User Authentication and Authorization:
-2.User Management:
-3.Lost Item Reporting:
-4.Item Category Management:
-5.Claim Submission and Management:
-6.Search and Filter Functionality:
-7.Error Handling:
-## Technology Stack
-The application is built using the following technologies:
-- Node.js
-- Express.js
-- Prisma
-- TypeScript
-- bcrypt
-- jsonwebtoken
-- dotenv
-- cors
+- **Admin Panel**
+  - Admins can manage user claims and update the status of items.
+  - The system supports viewing, approving, or rejecting claims based on verification.
 
-## Setup Instructions
+## 🧩 Components
 
-Follow these steps to set up and run the application locally:
+### `FoundItemsPage`
+- Displays a grid of all found items with consistent styling for images and card heights.
+- Users can click on an item to view details or initiate a claim.
 
-1. **Clone the Repository:**
-   git clone <repository-url>
-2.**Install Dependencies:**
-   npm install
-3.**Set Up Environment Variables:**
-   Create a .env file in the root directory.
-   Define the following variables:
-DATABASE_URL=
-NODE_ENV = 
-PORT = 
-JWT_SECRET = 
-EXPIRES_IN = 
-REFRESH_TOKEN_SECRET = 
-REFRESH_TOKEN_EXPIRES_IN = 
-RESET_PASS_TOKEN=
-RESET_PASS_TOKEN_EXPIRES_IN = 
-RESET_PASS_LINK=
-EMAIL = 
-APP_PASS = 
-4.**Run the Application:**
-   npm run dev
+### `Claims Modal`
+- A modal window that provides details about the claim process, including distinguishing features, date lost, verification methods, and contact details.
+- Styled for a rich user experience.
+
+### `DashboardLayout`
+- A clean and classic admin layout without footer buttons.
+- Attractive navigation links for ease of use.
+
+## ⚙️ Technologies Used
+
+- **Frontend**: React, Ant Design
+- **Backend**: Node.js, Express.js, Prisma
+- **Database**: PostgreSQL
+
+## 🛠️ Installation
+
+To get started with the project, follow the steps below:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/lost-and-found.git
