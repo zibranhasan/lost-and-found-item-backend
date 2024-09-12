@@ -1,49 +1,64 @@
-# 🛠️ Lost & Found Website
+# Lost & Found Website
 
-This repository contains the codebase for a **Lost & Found** web application that helps users report and claim lost items. It features user and admin management, an item claim process, and a comprehensive list of found items.
+## Overview
 
-## 🚀 Features
+The Lost & Found Website is a platform where users can report and claim lost items. The website features a comprehensive backend system that handles item claims, user management, and administrative tasks. This README provides details about the backend functionalities, setup instructions, and API usage.
 
-- **User Authentication**
-  - Users can sign up and log in to report or claim lost items.
-  - Admins have enhanced permissions to manage items and claims.
-  
-- **Found Items Management**
-  - Users can browse through all found items, with the ability to filter by category and other criteria.
-  - Each item is displayed in a consistent card format with fixed image size and a "Claim" button.
+## Features
 
-- **Claim Process**
-  - Users can claim an item by providing verification details.
-  - Claim requests include fields such as distinguishing features, date lost, verification method, and contact information.
+- **User Management**: Users can register, log in, and manage their profiles.
+- User Endpoints
+Register User
 
-- **Admin Panel**
-  - Admins can manage user claims and update the status of items.
-  - The system supports viewing, approving, or rejecting claims based on verification.
+POST /api/users/register
+Request body: { username, password, email }
+Response: User object
+Login User
 
-## 🧩 Components
+POST /api/users/login
+Request body: { username, password }
+Response: JWT token
+- **Item Reporting**: Users can report lost items with details.
+- Item Endpoints
+Report Lost Item
 
-### `FoundItemsPage`
-- Displays a grid of all found items with consistent styling for images and card heights.
-- Users can click on an item to view details or initiate a claim.
+POST /api/items/report
+Request body: { name, description, foundDate, contactInformation }
+Response: Item object
+Get Found Items
 
-### `Claims Modal`
-- A modal window that provides details about the claim process, including distinguishing features, date lost, verification methods, and contact details.
-- Styled for a rich user experience.
+GET /api/items/found
+Response: List of found items
+Claim Item
 
-### `DashboardLayout`
-- A clean and classic admin layout without footer buttons.
-- Attractive navigation links for ease of use.
+POST /api/items/claim
+Request body: { itemId }
+Response: Claim status
+- **Item Claiming**: Users can browse found items and claim them.
+- **Admin Management**: Admins can manage claims and oversee reported items.
+- Admin Endpoints
+Manage Claims
 
-## ⚙️ Technologies Used
+GET /api/admin/claims
+Response: List of all claims
+Update Claim Status
 
-- **Frontend**: React, Ant Design
-- **Backend**: Node.js, Express.js, Prisma
-- **Database**: PostgreSQL
+PATCH /api/admin/claims/:id
+Request body: { status }
+Response: Updated claim object
 
-## 🛠️ Installation
+## Technologies Used
 
-To get started with the project, follow the steps below:
+- **Node.js**: Server-side JavaScript runtime.
+- **Express.js**: Web application framework for Node.js.
+- **Prisma**: ORM for database interactions.
+- **MongoDB/PostgreSQL**: Database for storing user data and item information.
+- **Ant Design**: Frontend component library for styling (if applicable).
 
-1. **Clone the repository**:
+## Installation
+
+1. **Clone the Repository**
+
    ```bash
-   git clone https://github.com/yourusername/lost-and-found.git
+   git clone <repository-url>
+
