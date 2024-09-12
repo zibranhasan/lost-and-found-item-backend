@@ -60,5 +60,5 @@ Response: Updated claim object
 1. **Clone the Repository**
 
    ```bash
-   git clone <repository-url>
+   git clone (https://github.com/zibranhasan/lost-and-found-item-backend)
 
